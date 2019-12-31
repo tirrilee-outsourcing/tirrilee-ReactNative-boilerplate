@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {SafeAreaView, Text} from 'react-native';
+import {SafeAreaView, Text, Alert} from 'react-native';
 import styled from 'styled-components/native';
 import Counter from 'stores/Counter';
 import UserStore from 'stores/UserStore';
@@ -7,13 +7,20 @@ import {observer} from 'mobx-react';
 
 @observer
 export default class App extends Component {
-  componentDidMount() {
-    UserStore.getData();
-  }
+  deleteUser = user => {
+    Alert.alert('유저 삭제', `${user.name}해당 유저를 삭제하시겠습니까?`, [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: () => UserStore.deleteUser(user)},
+    ]);
+  };
 
   render() {
     const {users} = UserStore;
-    console.log('리스트', users);
+
     return (
       <SafeAreaView>
         <Wrapper>
@@ -27,11 +34,11 @@ export default class App extends Component {
             </FuncBox>
           </CustomView>
           <TodoView>
-            {users.slice(0, 20).map(user => (
+            {users.map(user => (
               <TodoItem key={user.id}>
-                <Text>{user.name}</Text>
-                <Text>{user.email}</Text>
-                <Text>{user.address.city}</Text>
+                <Text onPress={() => this.deleteUser(user)}>
+                  이름: {user.name}
+                </Text>
               </TodoItem>
             ))}
           </TodoView>
@@ -87,6 +94,7 @@ const MyButton = styled.Button`
 const TodoItem = styled.View`
   width: 33%;
   height: 10%;
-
+  justify-content: center;
+  align-items: center;
   background-color: lightblue;
 `;
