@@ -1,14 +1,21 @@
-import {observable, action} from 'mobx';
+import {types} from 'mobx-state-tree';
 
-class Counter {
-  @observable num = 0;
+const CounterStore = types
+  .model('counter', {
+    num: types.number,
+  })
 
-  @action increase() {
-    this.num += 1;
-  }
-  @action decrease() {
-    this.num -= 1;
-  }
-}
+  .actions(self => ({
+    increase: () => {
+      self.num++;
+    },
+    decrease: () => {
+      self.num--;
+    },
+  }))
 
-export default new Counter();
+  .create({
+    num: 0, // 초기 값
+  });
+
+export default CounterStore;
