@@ -1,12 +1,54 @@
 import React, {Component} from 'react';
-import {SafeAreaView, Text, Alert} from 'react-native';
+import {observer} from 'mobx-react';
+import {Text, View, SafeAreaView, Alert} from 'react-native';
 import styled from 'styled-components/native';
+import {useQuery} from '@apollo/react-hooks';
+import {gql} from 'apollo-boost';
+
 import Counter from 'stores/Counter';
 import UserStore from 'stores/UserStore';
-import {observer} from 'mobx-react';
+
+const GET_BOOKS = gql`
+  {
+    books {
+      title
+      author
+    }
+  }
+`;
+
+const Home = () => {
+  const {loading, error, data} = useQuery(GET_BOOKS);
+
+  let template = ``;
+  if (loading) {
+    template = (
+      <SafeAreaView>
+        <Text>`로딩중... ${loading}`</Text>
+      </SafeAreaView>
+    );
+  }
+  if (error) {
+    template = (
+      <SafeAreaView>
+        <Text>`에러발생 : ${error}`</Text>
+      </SafeAreaView>
+    );
+  }
+  if (data && data.books) {
+    template = data.books.map((item, index) => (
+      <SafeAreaView key={index}>
+        <Text>
+          {item.title} / {item.author}
+        </Text>
+      </SafeAreaView>
+    ));
+  }
+  return <View>{template}</View>;
+};
 
 @observer
-export default class App extends Component {
+export class Home2 extends Component {
   deleteUser = user => {
     Alert.alert('유저 삭제', `${user.name}해당 유저를 삭제하시겠습니까?`, [
       {
@@ -47,6 +89,15 @@ export default class App extends Component {
     );
   }
 }
+
+const RenderHome = () => (
+  <SafeAreaView>
+    <Home />
+    <Home2 />
+  </SafeAreaView>
+);
+
+export default RenderHome;
 
 const Wrapper = styled.View`
   width: 100%;
