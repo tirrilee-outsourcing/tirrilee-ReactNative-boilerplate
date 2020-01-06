@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {observer} from 'mobx-react';
-import {Text, View, SafeAreaView, Alert} from 'react-native';
+import {Text, View, SafeAreaView, Alert, Button, TextInput} from 'react-native';
 import styled from 'styled-components/native';
-import {useQuery} from '@apollo/react-hooks';
+import {useQuery, useMutation} from '@apollo/react-hooks';
 import {gql} from 'apollo-boost';
 
 import Counter from 'stores/Counter';
@@ -17,34 +17,35 @@ const GET_BOOKS = gql`
   }
 `;
 
-const Home = () => {
-  const {loading, error, data} = useQuery(GET_BOOKS);
+const ADD_BOOK = gql`
+  mutation {
+    addBook(title: $title, author: $author) {
+      title
+      author
+    }
+  }
+`;
 
-  let template = ``;
-  if (loading) {
-    template = (
-      <SafeAreaView>
-        <Text>`로딩중... ${loading}`</Text>
-      </SafeAreaView>
-    );
-  }
-  if (error) {
-    template = (
-      <SafeAreaView>
-        <Text>`에러발생 : ${error}`</Text>
-      </SafeAreaView>
-    );
-  }
-  if (data && data.books) {
-    template = data.books.map((item, index) => (
-      <SafeAreaView key={index}>
-        <Text>
-          {item.title} / {item.author}
-        </Text>
-      </SafeAreaView>
-    ));
-  }
-  return <View>{template}</View>;
+const Home = () => {
+  const [title, onChangeTitle] = React.useState('Title');
+  const [author, onChangeAuthor] = React.useState('Author');
+
+  const {loading, error, data} = useQuery(GET_BOOKS);
+  if (error) console.log('err', error);
+
+  return loading ? (
+    <Text>Loading...</Text>
+  ) : (
+    <View>
+      {data.books.map((item, idx) => (
+        <View style={{marginBottom: 5}}>
+          <View key={idx}>
+            <Text>제목: {item.title}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
 };
 
 @observer
